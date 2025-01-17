@@ -12,7 +12,7 @@ from yt_dlp import YoutubeDL
 from Royalkifeelings.callmusic.config import BOT_USERNAME as bn, SUDO_USERS
 from Royalkifeelings.helper.decorators import humanbytes
 from Royalkifeelings.helper.filters import command, other_filters
-
+from youtube_search import YoutubeSearch
 
 def cookie_txt_file():
     folder_path = f"{os.getcwd()}/cookies"
