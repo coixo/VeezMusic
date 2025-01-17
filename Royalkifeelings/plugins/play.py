@@ -54,43 +54,29 @@ DISABLED_GROUPS = []
 useer = "NaN"
 ACTV_CALLS = []
 
-
 @Royalboyamit.on_message(command(["play", f"play@{BOT_USERNAME}"]) & other_filters)
 async def play(c: Royalboyamit, m: Message):
-    await m.delete()  # Delete the incoming message to keep the chat clean.
-
+    await m.delete()
     replied = m.reply_to_message
     chat_id = m.chat.id
     user_id = m.from_user.id
     buttons = audio_markup(user_id)
-
     if m.sender_chat:
         return await m.reply_text("Bot 🤣 Na work Kare gaa ree 👀.")
-
     try:
-        # Fetch bot details (make sure this is correct)
         aing = await c.get_me()
     except Exception as e:
         return await m.reply_text(f"Error:\n\n{e}")
-
-    try:
-        # Fetch the chat member's status
-        a = await c.get_chat_member(chat_id, aing.id)
-    except Exception as e:
-        return await m.reply_text(f"Error fetching chat member:\n\n{e}")
-
-    # Ensure the bot is an administrator and has the necessary privileges
-    chat_privileges = await c.get_chat_privileges(chat_id, aing.id)  # Assuming method is available in the API
-
-    if not chat_privileges or not chat_privileges.can_delete_messages or not chat_privileges.can_add_users:
-        # Send a message informing the user about the necessary permissions for the bot
+    a = await c.get_chat_member(chat_id, aing.id)
+    
+    # Check if the bot is an administrator
+    if a.status != enums.ChatMemberStatus.ADMINISTRATOR:
         await m.reply_text(
-            f"**💡 ᴛᴏ ᴜsᴇ ᴍᴇ, ɪ ɴᴇᴇᴅ ᴛᴏ ʙᴇ ᴀɴ **ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀ** ᴡɪᴛʜ ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ **ᴘᴇʀᴍɪssɪᴏɴs**:\n\n"
-            "» ❌ __ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs__\n» ❌ __ᴀᴅᴅ ᴜsᴇʀs__\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__\n\n"
-            "ᴅᴀᴛᴀ ɪs **ᴜᴘᴅᴀᴛᴇᴅ** ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ʏᴏᴜ **ᴘʀᴏᴍᴏᴛᴇ ᴍᴇ**"
+            f"**💡 ᴛᴏ ᴜsᴇ ᴍᴇ, ɪ ɴᴇᴇᴅ ᴛᴏ ʙᴇ ᴀɴ **ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀ** ᴡɪᴛʜ ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ **ᴘᴇʀᴍɪssɪᴏɴs**:\n\n» ❌ __ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs__\n» ❌ __ᴀᴅᴅ ᴜsᴇʀs__\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__\n\nᴅᴀᴛᴀ ɪs **ᴜᴘᴅᴀᴛᴇᴅ** ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ʏᴏᴜ **ᴘʀᴏᴍᴏᴛᴇ ᴍᴇ**"
         )
         return
-
+    
+    # Check for required permissions
     if not a.can_manage_voice_chats:
         await m.reply_text(
             "**ᴍɪssɪɴɢ ʀᴇǫᴜɪʀᴇᴅ ᴘᴇʀᴍɪssɪᴏɴ:" + "\n\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__"
@@ -104,12 +90,15 @@ async def play(c: Royalboyamit, m: Message):
     if not a.can_invite_users:
         await m.reply_text("**ᴍɪssɪɴɢ ʀᴇǫᴜɪʀᴇᴅ ᴘᴇʀᴍɪssɪᴏɴ:" + "\n\n» ❌ __ᴀᴅᴅ ᴜsᴇʀs__**")
         return
+    
     try:
         ubot = (await user.get_me()).id
         b = await c.get_chat_member(chat_id, ubot)
+        
+        # Check if the bot is banned
         if b.status == enums.ChatMemberStatus.BANNED:
             await m.reply_text(
-                f"@{ASSISTANT_NAME} **ɪs ʙᴀɴɴᴇᴅ ɪɴ ɢʀᴏᴜᴘ** {m.chat.title}\n\n» **ᴜɴʙᴀɴ ᴛʜᴇ ᴜsᴇʀʙᴏᴛ ғɪʀsᴛ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴜsᴇ ᴛʜɪs ʙᴏᴛ.**"
+                f"@{ASSISTANT_NAME} **ɪs ʙᴀɴɴᴇᴅ ɪɴ ɢʀᴏᴜᴘ** {m.chat.title}\n\n» **ᴜɴʙᴀɴ ᴛʜᴇ ᴜsᴇʀʙᴏᴛ ғɪʀsᴛ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴇɴᴀʙʟᴇ ᴛʜɪs ʙᴏᴛ.**"
             )
             return
     except UserNotParticipant:
@@ -119,6 +108,23 @@ async def play(c: Royalboyamit, m: Message):
             except Exception as e:
                 await m.reply_text(f"❌ **ᴜsᴇʀʙᴏᴛ ғᴀɪʟᴇᴅ ᴛᴏ ᴊᴏɪɴ**\n\n**ʀᴇᴀsᴏɴ**: `{e}`")
                 return
+        else:
+            try:
+                invitelink = await c.export_chat_invite_link(
+                    m.chat.id
+                )
+                if invitelink.startswith("https://t.me/+"):
+                    invitelink = invitelink.replace(
+                        "https://t.me/+", "https://t.me/joinchat/"
+                    )
+                await user.join_chat(invitelink)
+            except UserAlreadyParticipant:
+                pass
+            except Exception as e:
+                return await m.reply_text(
+                    f"❌ **ᴜsᴇʀʙᴏᴛ ғᴀɪʟᴇᴅ ᴛᴏ ᴊᴏɪɴ**\n\n**ʀᴇᴀsᴏɴ**: `{e}`"
+                )
+
         else:
             try:
                 invitelink = await c.export_chat_invite_link(
