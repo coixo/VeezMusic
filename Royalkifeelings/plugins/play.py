@@ -125,7 +125,6 @@ async def play(c: Royalboyamit, m: Message):
                     f"❌ **ᴜsᴇʀʙᴏᴛ ғᴀɪʟᴇᴅ ᴛᴏ ᴊᴏɪɴ**\n\n**ʀᴇᴀsᴏɴ**: `{e}`"
                 )
 
-        else:
             try:
                 invitelink = await c.export_chat_invite_link(
                     m.chat.id
