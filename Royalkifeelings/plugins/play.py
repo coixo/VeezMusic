@@ -208,7 +208,7 @@ async def play(c: Royalboyamit, m: Message):
                 keyboard = stream_markup(user_id, dlurl)
                 playimg = await play_thumb(videoid)
                 queueimg = await queue_thumb(videoid)
-                format = "bestaudio"
+                format = "bestaudio[ext=m4a]"
                 Royalboyamit, ytlink = await ytdl(format, url)
                 if Royalboyamit == 0:
                     await pokemon.edit(f"💬 yt-dl issues detected\n\n» `{ytlink}`")
