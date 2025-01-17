@@ -1,10 +1,11 @@
+import os, random, glob, logging, json, asyncio, re
 from pyrogram.errors import UserAlreadyParticipant, UserNotParticipant
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, ChatPrivileges
 from pytgcalls import StreamType
 from pytgcalls.types.input_stream import AudioPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio
 from youtubesearchpython import VideosSearch
-
+from pyrogram import Client, filters, enums
 from Royalkifeelings.helper.filters import command, other_filters
 from Royalkifeelings.helper.inline import audio_markup, stream_markup
 from Royalkifeelings.helper.queues import QUEUE, add_to_queue
@@ -15,6 +16,17 @@ from Royalkifeelings import Royalboyamit as user
 from Royalkifeelings import bot as Royalboyamit
 from Royalkifeelings import call_py
 
+
+def cookie_txt_file():
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
 def ytsearch(query):
     try:
@@ -32,7 +44,7 @@ def ytsearch(query):
 
 
 async def ytdl(format: str, link: str):
-    stdout, stderr = await bash(f'yt-dlp --geo-bypass -g -f "[height<=?2160][width<=?1280]" {link}')
+    stdout, stderr = await bash(f"yt-dlp -i --get-id --geo-bypass --cookies {cookie_txt_file()} -g -f "[height<=?2160][width<=?1280]" --skip-download {link}")
     if stdout:
         return 1, stdout.split("\n")[0]
     return 0, stderr
@@ -42,26 +54,43 @@ DISABLED_GROUPS = []
 useer = "NaN"
 ACTV_CALLS = []
 
-    
+
 @Royalboyamit.on_message(command(["play", f"play@{BOT_USERNAME}"]) & other_filters)
 async def play(c: Royalboyamit, m: Message):
-    await m.delete()
+    await m.delete()  # Delete the incoming message to keep the chat clean.
+
     replied = m.reply_to_message
     chat_id = m.chat.id
     user_id = m.from_user.id
     buttons = audio_markup(user_id)
+
     if m.sender_chat:
         return await m.reply_text("Bot 🤣 Na work Kare gaa ree 👀.")
+
     try:
+        # Fetch bot details (make sure this is correct)
         aing = await c.get_me()
     except Exception as e:
         return await m.reply_text(f"Error:\n\n{e}")
-    a = await c.get_chat_member(chat_id, aing.id)
-    if a.status != "administrator":
+
+    try:
+        # Fetch the chat member's status
+        a = await c.get_chat_member(chat_id, aing.id)
+    except Exception as e:
+        return await m.reply_text(f"Error fetching chat member:\n\n{e}")
+
+    # Ensure the bot is an administrator and has the necessary privileges
+    chat_privileges = await c.get_chat_privileges(chat_id, aing.id)  # Assuming method is available in the API
+
+    if not chat_privileges or not chat_privileges.can_delete_messages or not chat_privileges.can_add_users:
+        # Send a message informing the user about the necessary permissions for the bot
         await m.reply_text(
-            f"**💡 ᴛᴏ ᴜsᴇ ᴍᴇ, ɪ ɴᴇᴇᴅ ᴛᴏ   ʙᴇ ᴀɴ **ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀ** ᴡɪᴛʜ ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ **ᴘᴇʀᴍɪssɪᴏɴs**:\n\n» ❌ __ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs__\n» ❌ __ᴀᴅᴅ ᴜsᴇʀs__\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__\n\nᴅᴀᴛᴀ ɪs **ᴜᴘᴅᴀᴛᴇᴅ** ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ʏᴏᴜ **ᴘʀᴏᴍᴏᴛᴇ ᴍᴇ**"
+            f"**💡 ᴛᴏ ᴜsᴇ ᴍᴇ, ɪ ɴᴇᴇᴅ ᴛᴏ ʙᴇ ᴀɴ **ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀ** ᴡɪᴛʜ ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ **ᴘᴇʀᴍɪssɪᴏɴs**:\n\n"
+            "» ❌ __ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs__\n» ❌ __ᴀᴅᴅ ᴜsᴇʀs__\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__\n\n"
+            "ᴅᴀᴛᴀ ɪs **ᴜᴘᴅᴀᴛᴇᴅ** ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ʏᴏᴜ **ᴘʀᴏᴍᴏᴛᴇ ᴍᴇ**"
         )
         return
+
     if not a.can_manage_voice_chats:
         await m.reply_text(
             "**ᴍɪssɪɴɢ ʀᴇǫᴜɪʀᴇᴅ ᴘᴇʀᴍɪssɪᴏɴ:" + "\n\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__"
@@ -78,7 +107,7 @@ async def play(c: Royalboyamit, m: Message):
     try:
         ubot = (await user.get_me()).id
         b = await c.get_chat_member(chat_id, ubot)
-        if b.status == "kicked":
+        if b.status == enums.ChatMemberStatus.BANNED:
             await m.reply_text(
                 f"@{ASSISTANT_NAME} **ɪs ʙᴀɴɴᴇᴅ ɪɴ ɢʀᴏᴜᴘ** {m.chat.title}\n\n» **ᴜɴʙᴀɴ ᴛʜᴇ ᴜsᴇʀʙᴏᴛ ғɪʀsᴛ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴜsᴇ ᴛʜɪs ʙᴏᴛ.**"
             )
@@ -134,10 +163,10 @@ async def play(c: Royalboyamit, m: Message):
                 await call_py.join_group_call(
                     chat_id,
                     AudioPiped(
-                        dl,
-                        HighQualityAudio(),
+                    dl,
+                    HighQualityAudio(),
                     ),
-                    stream_type=StreamType().local_stream,
+                    stream_type=StreamType().pulse_stream,
                 )
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
                 await pokemon.delete()
@@ -175,7 +204,7 @@ async def play(c: Royalboyamit, m: Message):
                 gcname = m.chat.title
                 videoid = search[4]
                 dlurl = f"https://www.youtubepp.com/watch?v={videoid}"
-                info = f"https://t.me/elsaa_Ro_bot?start=info_{videoid}"
+                info = f"https://t.me/{BOT_USERNAME}?start=info_{videoid}"
                 keyboard = stream_markup(user_id, dlurl)
                 playimg = await play_thumb(videoid)
                 queueimg = await queue_thumb(videoid)
@@ -203,10 +232,10 @@ async def play(c: Royalboyamit, m: Message):
                             await call_py.join_group_call(
                                 chat_id,
                                 AudioPiped(
-                                    ytlink,
-                                    HighQualityAudio(),
+                                ytlink,
+                                HighQualityAudio(),
                                 ),
-                                stream_type=StreamType().local_stream,
+                                stream_type=StreamType().pulse_stream,
                             )
                             add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
                             await pokemon.delete()
