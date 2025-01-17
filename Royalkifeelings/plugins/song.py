@@ -7,7 +7,7 @@ from pyrogram import filters, Client
 from Royalkifeelings import bot as Royalboyamit
 from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram.types import Message
-from youtubesearchpython.__future__ import VideosSearch
+from youtubesearchpython import VideosSearch
 from yt_dlp import YoutubeDL
 from Royalkifeelings.callmusic.config import BOT_USERNAME as bn, SUDO_USERS
 from Royalkifeelings.helper.decorators import humanbytes
