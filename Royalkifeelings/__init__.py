@@ -9,7 +9,7 @@ bot = Client(
     API_ID,
     API_HASH,
     bot_token=BOT_TOKEN,
-)
+) 
 
 # PYROGRAM CLIENT 2
 Royalboyamit = Client(
