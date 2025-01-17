@@ -1,6 +1,4 @@
-import re
-import asyncio
-
+import os, random, glob, logging, json, asyncio, re
 from Royalkifeelings import BOT_USERNAME
 from Royalkifeelings.helper.inline import stream_markup, audio_markup
 from Royalkifeelings.handler.chatname import CHAT_TITLE
@@ -10,6 +8,7 @@ from Royalkifeelings import call_py, Royalboyamit as user
 from Royalkifeelings import bot as Royalboyamit
 from pyrogram.errors import UserAlreadyParticipant, UserNotParticipant
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram import enums
 from pytgcalls import StreamType
 from pytgcalls.types.input_stream import AudioVideoPiped
 from pytgcalls.types.input_stream.quality import (
@@ -22,6 +21,18 @@ from youtubesearchpython import VideosSearch
 from Royalkifeelings.handler.thumbnail import play_thumb, queue_thumb
 
 IMAGE_THUMBNAIL = "https://te.legra.ph/file/ead56db6ded46455bcb2f.jpg"
+
+
+def cookie_txt_file():
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
 def ytsearch(query: str):
     try:
@@ -41,9 +52,10 @@ def ytsearch(query: str):
 async def ytdl(link):
     proc = await asyncio.create_subprocess_exec(
         "yt-dlp",
+        "--cookies",cookie_txt_file(),
         "-g",
         "-f",
-        "best[height<=?2160][width<=?1440]",
+        "best[height<=?720][width<=?1280]",
         f"{link}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -68,7 +80,7 @@ async def vplay(c: Royalboyamit, m: Message):
     except Exception as e:
         return await m.reply_text(f"error:\n\n{e}")
     a = await c.get_chat_member(chat_id, aing.id)
-    if a.status != "administrator":
+    if a.status != enums.ChatMemberStatus.ADMINISTRATOR:
         await m.reply_text(
             f"**💡 ᴛᴏ ᴜsᴇ ᴍᴇ, ɪ ɴᴇᴇᴅ ᴛᴏ ʙᴇ ᴀɴ **ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀ** ᴡɪᴛʜ ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ **ᴘᴇʀᴍɪssɪᴏɴs**:\n\n» ❌ __ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs__\n» ❌ __ɪɴᴠɪᴛᴇ ᴜsᴇʀs__\n» ❌ __ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ__\n\nᴏɴᴄᴇ ᴅᴏɴᴇ, ᴛʏᴘᴇ /ʀᴇʟᴏᴀᴅ**"
         )
@@ -91,7 +103,7 @@ async def vplay(c: Royalboyamit, m: Message):
     try:
         ubot = (await user.get_me()).id
         b = await c.get_chat_member(chat_id, ubot) 
-        if b.status == "kicked":
+        if b.status == enums.ChatMemberStatus.BANNED:
             await c.unban_chat_member(chat_id, ubot)
             invitelink = await c.export_chat_invite_link(chat_id)
             if invitelink.startswith("https://t.me/+"):
@@ -162,7 +174,7 @@ async def vplay(c: Royalboyamit, m: Message):
                         HighQualityAudio(),
                         esport,
                     ),
-                    stream_type=StreamType().local_stream,
+                    stream_type=StreamType().pulse_stream,
                 )
                 add_to_queue(chat_id, songname, dl, link, "Video", Q)
                 await loser.delete()
@@ -228,7 +240,7 @@ async def vplay(c: Royalboyamit, m: Message):
                                         HighQualityAudio(),
                                         esport,
                                     ),
-                                    stream_type=StreamType().local_stream,
+                                    stream_type=StreamType().pulse_stream,
                                 )
                                 add_to_queue(chat_id, songname, ytlink, url, "Video", Q)
                                 await loser.delete()
@@ -294,7 +306,7 @@ async def vplay(c: Royalboyamit, m: Message):
                                     HighQualityAudio(),
                                     esport,
                                 ),
-                                stream_type=StreamType().local_stream,
+                                stream_type=StreamType().pulse_stream,
                             )
                             add_to_queue(chat_id, songname, ytlink, url, "Video", Q)
                             await loser.delete()
