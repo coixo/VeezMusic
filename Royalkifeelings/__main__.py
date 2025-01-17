@@ -21,4 +21,5 @@ async def Royalkifeelings_boot():
 
 
 if __name__ == "__main__":
+    print("Bot Started...") 
     loop.run_until_complete(Royalkifeelings_boot())
