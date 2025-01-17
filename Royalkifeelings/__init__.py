@@ -9,7 +9,7 @@ bot = Client(
     API_ID,
     API_HASH,
     bot_token=BOT_TOKEN,
-) 
+    ) 
 
 # PYROGRAM CLIENT 2
 Royalboyamit = Client(
@@ -17,7 +17,7 @@ Royalboyamit = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=SESSION_NAME,
-)
+    )
 
 # Py-tgcalls CLIENT 1
 user = PyTgCalls(Royalboyamit)
