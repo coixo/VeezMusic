@@ -1,5 +1,5 @@
 import os, random, glob, logging, json, asyncio, re
-from Royalkifeelings.calmusic.config import BOT_USERNAME
+from Royalkifeelings.callmusic.config import BOT_USERNAME
 from Royalkifeelings.helper.inline import stream_markup, audio_markup
 from Royalkifeelings.handler.chatname import CHAT_TITLE
 from Royalkifeelings.helper.filters import command, other_filters
