@@ -1,40 +1,43 @@
+import os, math, glob, logging, json, time, random, aiofiles, aiohttp, requests, asyncio, wget, yt_dlp
 from __future__ import unicode_literals
-
-import asyncio
-import math
-import os
-import time
 from random import randint
 from urllib.parse import urlparse
-
-import aiofiles
-import aiohttp
-import requests
-import wget
-import yt_dlp
-from pyrogram import filters
+from pyrogram import filters, Client
 from Royalkifeelings import bot as Royalboyamit
 from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram.types import Message
-from youtube_search import YoutubeSearch
+from youtubesearchpython.__future__ import VideosSearch
 from yt_dlp import YoutubeDL
-
 from Royalkifeelings.callmusic.config import BOT_USERNAME as bn, SUDO_USERS
 from Royalkifeelings.helper.decorators import humanbytes
 from Royalkifeelings.helper.filters import command, other_filters
 
 
+def cookie_txt_file():
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+
+
+
 ydl_opts = {
-    'format': 'best',
-    'keepvideo': True,
-    'prefer_ffmpeg': False,
-    'geo_bypass': True,
-    'outtmpl': '%(title)s.%(ext)s',
-    'quite': True
+    "format": "bestaudio/best",
+    "outtmpl": "downloads/%(id)s.%(ext)s",
+    "geo_bypass": True,
+    "nocheckcertificate": True,
+    "quiet": True,
+    "cookiefile" : cookie_txt_file(),
+    "no_warnings": True,
 }
 
 
-@Royalboyamit.on_message(command(["song", f"song@{bn}"]) & ~filters.edited)
+@Royalboyamit.on_message(command(["song", f"song@{bn}"]))
 def song(_, message):
     query = " ".join(message.command[1:])
     m = message.reply("🔎 finding song...")
@@ -56,7 +59,7 @@ def song(_, message):
     m.edit("📥 downloading file...")
     try:
         with yt_dlp.YoutubeDL(ydl_ops) as ydl:
-            info_dict = ydl.extract_info(link, download=False)
+            info_dict = ydl.extract_info(link, download=True)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
         rep = f"**🎵 𝐔𝐩𝐥𝐨𝐚𝐝𝐞𝐝 𝐁𝐲 :- ✨ @royalkifeelings ❤**"
@@ -220,16 +223,16 @@ def time_to_seconds(times):
 
 
 @Royalboyamit.on_message(
-    command(["vsong", f"vsong@{bn}", "video", f"video@{bn}"]) & ~filters.edited
-)
+    command(["vsong", f"vsong@{bn}", "video", f"video@{bn}"]))
 async def vsong(Royalboyamit, message):
     ydl_opts = {
-        "format": "best",
-        "keepvideo": True,
-        "prefer_ffmpeg": False,
+        "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
+        "outtmpl": "downloads/%(id)s.%(ext)s",
         "geo_bypass": True,
-        "outtmpl": "%(title)s.%(ext)s",
-        "quite": True,
+        "nocheckcertificate": True,
+        "quiet": True,
+        "cookiefile" : cookie_txt_file(),
+        "no_warnings": True,
     }
     query = " ".join(message.command[1:])
     try:
@@ -266,4 +269,3 @@ async def vsong(Royalboyamit, message):
         await msg.delete()
     except Exception as e:
         print(e)
-
