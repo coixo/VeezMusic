@@ -44,7 +44,7 @@ def ytsearch(query):
 
 
 async def ytdl(format: str, link: str):
-    stdout, stderr = await bash(f"yt-dlp -i --get-id --geo-bypass --cookies {cookie_txt_file()} -g -f "[height<=?2160][width<=?1280]" --skip-download {link}")
+    stdout, stderr = await bash(f"yt-dlp -i --get-id --geo-bypass --cookies {cookie_txt_file()} -g -f --skip-download {link}")
     if stdout:
         return 1, stdout.split("\n")[0]
     return 0, stderr
