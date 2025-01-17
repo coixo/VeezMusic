@@ -1,5 +1,5 @@
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from youtubesearchpython import VideosSearch
+from youtubesearchpython.__future__ import VideosSearch
 from Royalkifeelings.callmusic.config import GROUP_SUPPORT as Royalboyamit
 
 
