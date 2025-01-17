@@ -7,17 +7,17 @@ from Royalkifeelings.plugins import ALL_PLUGINS
 # PYROGRAM CLIENT 1
 bot = Client(
     "Royalkifeelings1",  # This is a positional argument (session name)
-    api_id=config.API_ID,       # These are keyword arguments
-    api_hash=config.API_HASH,
-    bot_token=config.BOT_TOKEN
+    api_id=API_ID,       # These are keyword arguments
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN
 )
 
 # PYROGRAM CLIENT 2
 Royalboyamit = Client(
     "Royalkifeelings2",  # This is a positional argument (session name)
-    api_id=config.API_ID,       # These are keyword arguments
-    api_hash=config.API_HASH,
-    session_string=config.SESSION_NAME
+    api_id=API_ID,       # These are keyword arguments
+    api_hash=API_HASH,
+    session_string=SESSION_NAME
 )
 
 # Py-tgcalls CLIENT 1
